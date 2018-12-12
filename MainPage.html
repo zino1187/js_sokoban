@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MainPage</title>
+<style>
+.wrapper{
+	width:1500px;
+	height:900px;
+	margin:auto;
+}
+#stage{
+	background:url("./res/pointerBg.png");
+	width:900px;
+	height:100%;
+	margin:auto;
+	position:relative;
+	float:left;
+}
+#controller{
+	width:300px;
+	height:100%;
+	float:left;
+}
+#controller button{
+	margin-top:50px;
+	width:120px;
+	height:50px;
+	font-size:18px;
+	border-radius:30px;
+	font-weight:bold;
+	background:#000;
+	color:#fff;
+	float:left;
+}
+#info{
+	width:300px;
+	height:100%;
+	float:left;
+}
+</style>
+<script src="./lib/GameObject.js"></script>
+<script src="./lib/ObjectManager.js"></script>
+<script src="./lib/Btn.js"></script>
+<script src="./lib/Block.js"></script>
+<script src="./lib/Box.js"></script>
+<script src="./lib/Hero.js"></script>
+<script src="./lib/MiniBox.js"></script>
+<script src="./lib/common.js"></script>
+<script>
+//0:빈화면, 1:block, 2:box(box/changeBox), 7:hero, 9 : point
+var stageArray=[
+	[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0],
+	[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0],
+	[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+	[0,0,0,1,0,2,1,1,1,1,1,1,1,0,0,1,0,0],
+	[0,1,1,1,1,7,1,1,1,1,1,1,1,0,1,1,1,1],
+	[0,1,0,0,0,2,0,0,0,1,0,0,0,2,0,0,0,1],
+	[0,1,0,0,2,0,2,0,0,1,0,0,2,0,2,0,0,1],
+	[0,1,0,2,0,2,0,2,0,1,0,2,0,2,0,2,0,1],
+	[0,1,2,0,0,0,0,0,2,1,2,0,2,0,2,0,2,1],
+	[0,1,0,2,0,0,0,2,0,1,0,2,0,2,0,2,0,1],
+	[0,1,0,0,2,0,2,0,0,1,0,0,2,0,2,0,0,1],
+	[0,1,0,0,0,2,0,0,0,1,1,0,0,2,0,0,1,1],
+	[1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0],
+	[1,0,0,0,1,0,1,0,0,2,0,0,1,0,0,0,1,0],
+	[1,0,0,0,2,0,0,2,0,2,0,0,1,0,1,0,1,0],
+	[1,1,1,1,1,1,1,0,0,2,0,2,0,0,0,0,1,0],
+	[0,0,0,0,0,0,1,0,0,2,0,0,1,1,1,1,1,0],
+	[0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0],
+];
+
+var pointerArray=[
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,9,0,0,0,0,0,0,0,9,0,0,0,0],
+	[0,0,0,0,9,0,9,0,0,0,0,0,9,0,9,0,0,0],
+	[0,0,0,9,0,0,0,9,0,0,0,9,0,9,0,9,0,0],
+	[0,0,9,0,0,9,0,0,9,0,9,0,9,9,9,0,9,0],
+	[0,0,0,9,0,0,0,9,0,0,0,9,0,9,0,9,0,0],
+	[0,0,0,0,9,0,9,0,0,0,0,0,9,0,9,0,0,0],
+	[0,0,0,0,0,9,0,0,0,0,0,0,0,9,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+];
+
+//div id
+var stage; //무대
+var controller;
+
+var stageBlock;
+var pointer;
+var scoreBox; //점수표시박스
+var num; //stage 넘버
+var type;
+var hero;
+var blockArray=[]; //생성된 block를 담는 배열
+
+var objectManager = new ObjectManager();
+var obj;
+var key;
+var stepCount=0;
+var remainingBox=0;
+
+var info,rank;
+var flag=true;
+var flag2=true;
+var st;
+
+//초기화 함수
+function init(){
+	stage = document.getElementById("stage");
+	controller = document.getElementById("controller");
+	info = document.getElementById("info");
+	info.style.position="relative";
+	createStage();
+	//createPointer();
+	createHero();
+	showScore();
+	gameLoop();
+	
+}
+
+//무대 생성 함수
+function createStage(){
+	for(var a=0; a<stageArray.length; a++){
+		for(var i=0; i<stageArray[0].length; i++){
+			//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+			num=stageArray[a][i];
+			switch(num){
+				case 1:
+					createBlock(50*i ,50*a);
+				break;
+				case 2:
+					createBox(i , a); //앞 인수x가 컬럼을 결정, 뒤 인수 y가 row 를 결정
+				break;
+			}
+		}
+	}
+}
+
+//게임 설명 함수
+function openInfo(){
+	if(flag){
+		//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+		info = new MiniBox("",stage,0,0,500,500,0,0,0,0,"","#99ffcc");
+		var infoStr="";
+		infoStr+="<h2><center>"+"Socoban Game"+"</center></h2>"
+					+"1. 지정된 파란색 위치(목표)로 박스를 옮겨놓으세요"+"<br/>"
+					+"2. 박스가 지정된 위치로 옮겨지면 하얀색으로 변합니다."+"<br/>"
+					+"3. 화면에 파란색 위치에 모든 박스를 옮겨넣은 경우 성공!"+"<br/>"
+					+"4. 이동 횟수가 적을 수록 랭크가 올라갑니다."+"<br/>";
+		info.div.innerHTML=infoStr;
+		info.div.style.fontSize=25+"px";
+		//닫기 버튼 생성
+		//container,width,height,x,y,text,fontSize,bg
+		//var closeBtn1 = new Btn(info.div,60,30,30,30,"닫기",15,"black");
+	}else{
+		stage.removeChild(info.div);
+	}
+	flag=!flag;
+}
+
+//랭크확인 함수
+function showRank(){
+	if(flag2){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	rank = new MiniBox("",stage,0,0,500,500,0,0,0,0,"","black");
+	var rankStr="";
+	rankStr+=""
+	//닫기 버튼 생성
+	//container,width,height,x,y,text,fontSize,bg
+	//var closeBtn2 = new Btn(info.div,60,30,30,30,"닫기",15,"black");
+	}else{
+		stage.removeChild(rank.div);
+	}
+	flag2=!flag2;
+}
+
+//주인공 생성 함수
+function createHero(){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	for(var a=0; a<stageArray.length; a++){
+		for(var i=0; i<stageArray[0].length; i++){
+			//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+			num=stageArray[a][i];
+			switch(num){
+				case 7:
+					hero = new Hero("HERO",stage,(50*i)+10,(50*a)+10,20,20,0,0,0,0,"./res/frontHero.png","");
+					objectManager.addObject(hero);
+					//console.log("히어로 생성");
+				break;
+			}
+		}
+	}
+
+}
+
+//블럭(벽)생성 함수
+function createBlock(x , y){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	var block = new Block("BLOCK",stage, x, y ,50,50,0,0,0,0,"./res/block.png","", x, y);
+	objectManager.addObject(block);
+	//blockArray.push(block);
+}
+
+//박스생성 함수
+function createBox(x,y){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	var box = new Box("BOX",stage,x*50,y*50,50,50,0,0,0,0,"","",x, y);
+	objectManager.addObject(box);
+}
+
+//점수를 보여주는 함수
+function showScore(){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	var str=""
+	scoreBox = new MiniBox("",info,20,50,280,200,0,0,0,0,"","white");
+	str+="<h2>"+"▒▒ score ▒▒"+"</h2>"+"걸은 횟수 : "+stepCount+"<br/>"+"남은 박스 : "+remainingBox;
+	scoreBox.div.innerHTML=str;
+	scoreBox.div.style.border=2+"px solid black";
+	scoreBox.div.style.textAlign="center";
+	scoreBox.div.style.fontSize=25+"px";
+	//console.log(stepCount);
+}
+
+//주인공 움직임 함수
+function move(){
+	key= event.keyCode;
+	switch(key){
+		case 37: //좌
+			hero.velX=-1;
+			stepCount++;
+			hero.src="./res/leftHero.png";
+		break;
+		case 39:
+			hero.velX=1;
+			stepCount++;
+			hero.src="./res/rightHero.png";
+		break;
+		case 38:
+			hero.velY=-1;
+			stepCount++;
+			hero.src="./res/backHero.png";
+		break;
+		case 40:
+			hero.velY=1;
+			stepCount++;
+			hero.src="./res/frontHero.png";
+		break;
+	}	
+	hero.img.src=hero.src;
+	showScore();
+}
+
+//주인공 멈춤 함수
+function stop(){
+	hero.velX=0;
+	hero.velY=0;
+}
+
+function gameLoop(){
+	objectManager.tick();
+	objectManager.render();
+	st=setTimeout("gameLoop()",10);
+}
+
+addEventListener("load",function(){
+	init();
+});
+
+</script>
+</head>
+<body onKeyDown="move()" onKeyUp="stop()">
+	<div class="wrapper">
+		<div id="controller">
+			<button onClick="openInfo()">게임 설명</button>
+			<button onClick="showRank()">랭크 확인</button>
+		</div>
+		<div id="stage"></div>
+		<div id="info"></div>
+	</div>
+</body>
+</html>

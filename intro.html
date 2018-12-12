@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>introPage</title>
+<style>
+.wrapper{
+	/*background:url("")*/
+	background:yellow;
+	width:1200px;
+	height:900px;
+	margin:auto;
+	position:relative;
+}
+#stage{
+	width:300px;
+	height:300px;
+	background:red;
+	margin-top:300px;
+	margin-left:450px;
+	position:absolute;
+}
+#stage button{
+	width:300px;
+	height:80px;
+	font-size:40px;
+	margin-top:15px;
+}
+</style>
+<script src="./lib/GameObject.js"></script>
+<script src="./lib/MiniBox.js"></script>
+<script src="./lib/Btn.js"></script>
+<script>
+var stage;
+var info;
+var closeBtn;
+
+function init(){
+	stage = document.getElementById("stage");
+}
+
+function openInfo(){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	info = new MiniBox("",stage,-250,-250,800,800,0,0,0,0,"","blue");
+	//닫기 버튼 생성
+	//container,width,height,x,y,text,fontSize,bg
+	closeBtn = new Btn(info.div,60,30,30,30,"닫기",15,"pink");
+	//closeBtn.div.style.display="none";
+}
+
+function showRank(){
+	//type,container,x,y,width,height,velX,velY,targetX,targetY,src,bg
+	var rank = new MiniBox("",stage,-250,-250,800,800,0,0,0,0,"","black");
+	//닫기 버튼 생성
+	//container,width,height,x,y,text,fontSize,bg
+	closeBtn = new Btn(info.div,60,30,30,30,"닫기",15,"pink");
+}
+
+addEventListener("load", function(){
+	init();
+});
+</script>
+</head>
+<body>
+	<div class="wrapper">
+		<div id="stage">
+			<button onClick="openInfo()">게임설명</button>
+			<form action="./MainPage.html">
+				<button>게임시작</button>
+			</form>
+			<button onClick="showRank()">랭크확인</button>
+		</div>
+	</div>
+</body>
+</html>
